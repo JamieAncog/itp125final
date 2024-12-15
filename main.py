@@ -15,40 +15,36 @@ def gen_md5(password):
     return md5hash
 
 
-def all_combos(start, letters, n, prefixes, prefix, password_list, hashes):
+def all_combos(start, letters, n, prefix, password_list, hashes):
+    for curr_hash in hashes:
+        if gen_md5(prefix) == curr_hash:
+            password_list.append(prefix)
+            curr_time = time.time()
+            elapsed_time = curr_time - start
+
+            passwords_file = open("passwords.txt", "a")
+            passwords_file.write(passwords[-1] + "\n")
+            passwords_file.write(str(elapsed_time) + " seconds to crack\n\n")
+            passwords_file.close()
+
+            del curr_hash
+
     if len(prefix) == n:
-        prefixes.append(prefix)
-        for curr_hash in hashes:
-            if gen_md5(prefix) == curr_hash:
-                password_list.append(prefix)
-                curr_time = time.time()
-                elapsed_time = curr_time - start
-
-                passwords_file = open("passwords.txt", "a")
-                passwords_file.write(passwords[-1] + "\n")
-                passwords_file.write(str(elapsed_time) + " seconds to crack\n\n")
-                passwords_file.close()
-
-                del curr_hash
-                return
+        return
     else:
         for x in range(len(letters)):
-            all_combos(start, letters, n, prefixes, prefix + letters[x], password_list, hashes)
+            all_combos(start, letters, n, prefix + letters[x], password_list, hashes)
 
 
 def decrypt_md5(max_length, password_list, hashes):
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@!?"
     start_time = time.time()
 
-    length = 1
-    while length <= max_length and len(hashes) > 0:
-        prefixes = []
-        all_combos(start_time, chars, length, prefixes, "", password_list, hashes)
-        length += 1
+    all_combos(start_time, chars, max_length, "", password_list, hashes)
 
 
 passwords = []
-decrypt_md5(10, passwords, hashes_list)
+decrypt_md5(3, passwords, hashes_list)
 
 
 hash_file.close()
