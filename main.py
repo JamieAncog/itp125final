@@ -15,56 +15,47 @@ def gen_md5(password):
     return md5hash
 
 
-def find_password(attempts, max_length, curr_hash, password_list, hashes):
+def all_combos(letters, n, prefixes, prefix):
+    if len(prefix) == n:
+        prefixes.append(prefix)
+        return
+    else:
+        for x in range(len(letters)):
+            all_combos(letters, n, prefixes, prefix + letters[x])
 
+
+def decrypt_md5(max_length, curr_hash, password_list, hashes):
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
     chars_with_symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%&*()?"
 
-    first_try = crack_hash(chars, attempts, max_length, curr_hash, password_list, hashes)
-
-    if not first_try:
-        try_again = crack_hash(chars_with_symbols, attempts, max_length, curr_hash, password_list, hashes)
-        if not try_again:
-            password_list.append("Could not crack")
-
-
-def crack_hash(char_list, attempts, max_length, curr_hash, password_list, hashes):
-    is_cracked = False
-    while len(attempts[-1]) <= max_length and not is_cracked:
-        is_cracked = try_next(char_list, attempts, curr_hash, password_list, hashes)
-    if is_cracked:
-        return True
-    else:
-        return False
-
-
-def try_next(char_list, attempts, curr_hash, password_list, hashes):
-    curr = attempts[0]
-    for curr_char in char_list:
-        print(curr + curr_char)
-        if gen_md5(curr + curr_char) == hashes[curr_hash]:
-            password_list.append(curr + curr_char)
-            return True
-        else:
-            attempts.append(curr + curr_char)
-    del attempts[0]
-    return False
+    length = 1
+    while length <= max_length:
+        prefixes = []
+        all_combos(chars, length, prefixes, "")
+        for prefix in prefixes:
+            if gen_md5(prefix) == hashes[curr_hash]:
+                password_list.append(prefix)
+                print(prefix)
+        print(prefixes)
+        length += 1
 
 
 passwords = []
-for i in range(len(hashes_list)):
+for i in range(1):
     passwords_file = open("passwords.txt", "a")
     start_time = time.perf_counter()
 
     num_chars = 10
-    tries = [""]
-    find_password(tries, num_chars, i, passwords, hashes_list)
+    decrypt_md5(2, 0, passwords, hashes_list)
 
     end_time = time.perf_counter()
     elapsed_time = end_time - start_time
 
-    passwords_file.write(passwords[-1] + "\n")
-    passwords_file.write(str(elapsed_time) + " seconds to crack\n\n")
+    print(passwords[-1])
+    print(str(elapsed_time) + " seconds to crack\n\n")
+
+    # passwords_file.write(passwords[-1] + "\n")
+    # passwords_file.write(str(elapsed_time) + " seconds to crack\n\n")
     passwords_file.close()
 
 
