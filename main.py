@@ -17,50 +17,53 @@ def gen_md5(password):
     return md5hash
 
 
-def all_combos_rec(letters, n, prefixes, prefix, curr_hash, password_list, hashes):
-    if len(prefix) == n:
-        prefixes.append(prefix)
-        if gen_md5(prefix) == hashes[curr_hash]:
-            password_list.append(prefix)
-            return
-    else:
-        for x in range(len(letters)):
-            all_combos_rec(letters, n, prefixes, prefix + letters[x], curr_hash, password_list, hashes)
+def find_password(attempts, max_length, curr_hash, password_list, hashes):
 
-
-def all_combos(letters, n, prefixes, prefix):
-    if len(prefix) == n:
-        prefixes.append(prefix)
-        return
-    else:
-        for x in range(len(letters)):
-            all_combos(letters, n, prefixes, prefix + letters[x])
-
-
-def decrypt_md5(max_length, curr_hash, password_list, hashes):
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@!?"
 
-    length = 1
-    while length <= max_length:
-        prefixes = []
-        all_combos_rec(chars, length, prefixes, "", curr_hash, password_list, hashes)
-        # print(prefixes)
-        if len(password_list) > 0 and gen_md5(password_list[-1]) == hashes[curr_hash]:
+    crack_hash(chars, attempts, max_length, curr_hash, password_list, hashes)
+
+
+def crack_hash(char_list, attempts, max_length, curr_hash, password_list, hashes):
+    is_cracked = [False]
+    my_processes = []
+    while len(attempts[-1]) <= max_length and not is_cracked[0]:
+        p1 = multiprocessing.Process(target=try_next, args=(char_list, attempts, curr_hash, password_list, hashes,
+                                                           is_cracked))
+        my_processes.append(p1)
+        p1.start()
+
+    for my_p in my_processes:
+        my_p.join()
+
+
+def try_next(char_list, attempts, curr_hash, password_list, hashes, cracked):
+    curr = attempts[0]
+    for curr_char in char_list:
+        # print(curr + curr_char)
+        if gen_md5(curr + curr_char) == hashes[curr_hash]:
+            password_list.append(curr + curr_char)
+            cracked[0] = True
             return
-        length += 1
+        else:
+            attempts.append(curr + curr_char)
+    del attempts[0]
 
 
-def helper(n):
+def helper(ml, n):
     passwords = []
     passwords_file = open("passwords.txt", "a")
     start_time = time.perf_counter()
 
-    decrypt_md5(5, n, passwords, hashes_list)
+    tries = [""]
+    find_password(tries, ml, n, passwords, hashes_list)
 
     end_time = time.perf_counter()
     elapsed_time = end_time - start_time
 
-    print(passwords[-1])
+    if len(passwords) > 0:
+        print(passwords[-1])
+    print(passwords)
     print(str(elapsed_time) + " seconds to crack\n\n")
 
     passwords_file.close()
@@ -88,15 +91,24 @@ def do_sm():
 def h():
     my_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@!?"
     my_prefixes = []
-    all_combos(my_chars, 8, my_prefixes, "")
 
 
 if __name__ == '__main__':
+
+    s = time.perf_counter()
+
+    helper(1, 0)
+    helper(2, 1)
+
+    e = time.perf_counter()
+    el = e - s
+    print(str(el) + " seconds")
+
     st = time.perf_counter()
 
     processes = []
-    for i in range(1):
-        p = multiprocessing.Process(target=h)
+    for i in range(2):
+        p = multiprocessing.Process(target=helper, args=(i+1, i))
         processes.append(p)
         p.start()
 
@@ -105,4 +117,6 @@ if __name__ == '__main__':
 
     en = time.perf_counter()
     ela = en - st
+    print(str(el) + " seconds")
     print(str(ela) + " seconds")
+
