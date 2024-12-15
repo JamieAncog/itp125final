@@ -63,9 +63,6 @@ for i in range(len(hashes_list)):
     end_time = time.perf_counter()
     elapsed_time = end_time - start_time
 
-    print(passwords)
-    print(str(elapsed_time) + " seconds to crack\n")
-
     passwords_file.write(passwords[-1] + "\n")
     passwords_file.write(str(elapsed_time) + " seconds to crack\n\n")
     passwords_file.close()
