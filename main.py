@@ -67,5 +67,4 @@ if __name__ == '__main__':
     for process in processes:
         process.join()
 
-
-hash_file.close()
+    hash_file.close()
