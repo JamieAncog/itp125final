@@ -28,8 +28,7 @@ def all_combos(letters, n, prefixes, prefix, curr_hash, password_list, hashes):
 
 
 def decrypt_md5(max_length, curr_hash, password_list, hashes):
-    chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-    chars_with_symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%&*()?"
+    chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@!?"
 
     length = 1
     while length <= max_length:
