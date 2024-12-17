@@ -32,7 +32,7 @@ def all_combos(letters, n, prefixes, prefix):
 # This function decrypts the hash at a given index and adds it to a list of passwords
 
 
-def decrypt_md5(max_length, index, password_list, hashes):
+def crack_md5(max_length, index, password_list, hashes):
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@!?"
 
     # At each possible length, find every possible combination of characters and add to combos list
@@ -64,12 +64,16 @@ def helper(password_list, max_length, index, hashes):
 
     # Use the decrypt function to find the hash at a given index
 
-    decrypt_md5(max_length, index, password_list, hashes)
+    crack_md5(max_length, index, password_list, hashes)
 
     # End the timer and calculate the elapsed time
 
     end_time = time.perf_counter()
     elapsed_time = end_time - start_time
+
+    # Output the passwords and time to crack to the screen
+
+    print(password_list[-1] + "\t" + str(elapsed_time) + " seconds to crack")
 
     # Record the password in passwords.txt along with the time taken to crack
 
